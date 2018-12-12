@@ -2,9 +2,9 @@ import React, { Component } from 'react'
 import { ApolloProvider } from 'react-apollo'
 import { Query } from 'react-apollo'
 import client from './client'
-import { ME, SEARCH_REPOSITORIES } from './graphql'
+import { SEARCH_REPOSITORIES } from './graphql'
 
-const VARIABLES = {
+const DEFAULT_STATE = {
   first: 5,
   after: null,
   last: null,
@@ -15,15 +15,30 @@ const VARIABLES = {
 class App extends Component {
   constructor(props) {
     super(props)
-    this.state = VARIABLES
+    this.state = DEFAULT_STATE
+
+    this.handleChange = this.handleChange.bind(this)
+    this.handleSubmit = this.handleSubmit.bind(this)
+  }
+
+  handleChange(event) {
+    this.setState({
+      ...DEFAULT_STATE, query: event.target.value
+    })
+  }
+
+  handleSubmit(event) {
+    event.preventDefault()
   }
 
   render() {
     const { query, first, last, before, after } = this.state
-
+    console.log({query})
     return (
       <ApolloProvider client={client}>
-        <div>Hello, GraphQL</div>
+        <form onSubmit={this.handleSubmit}>
+          <input value={query} onChange={this.handleChange} />
+        </form>
         <Query
           query={SEARCH_REPOSITORIES}
           variables={{ query, first, last, before, after }}>
@@ -31,7 +46,7 @@ class App extends Component {
             ({ loading, error, data }) => {
               if (loading) return 'Loading...'
               if (error) return `Error! ${error.message}`
-              console.log(data)
+              console.log({data})
               return <div></div>
             }
           }
